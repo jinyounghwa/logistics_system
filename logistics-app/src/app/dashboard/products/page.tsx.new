@@ -1,0 +1,409 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+
+// 상품 타입 정의
+type Product = {
+  id: string;
+  name: string;
+  category: string;
+  location: string;
+  stockQuantity: number;
+  minStockLevel: number;
+  maxStockLevel: number;
+  optimalStockLevel?: number;
+  stockStatus: 'low' | 'normal' | 'excess';
+};
+
+export default function Products() {
+  // 상품 목록 상태
+  const [products, setProducts] = useState<Product[]>([
+    {
+      id: 'A-001',
+      name: '노트북',
+      category: '전자제품',
+      location: 'A-1-2',
+      stockQuantity: 5,
+      minStockLevel: 10,
+      maxStockLevel: 30,
+      stockStatus: 'low'
+    },
+    {
+      id: 'B-042',
+      name: '모니터',
+      category: '전자제품',
+      location: 'B-3-1',
+      stockQuantity: 3,
+      minStockLevel: 5,
+      maxStockLevel: 20,
+      stockStatus: 'low'
+    },
+    {
+      id: 'C-103',
+      name: '키보드',
+      category: '전자제품',
+      location: 'C-2-4',
+      stockQuantity: 120,
+      minStockLevel: 30,
+      maxStockLevel: 100,
+      stockStatus: 'excess'
+    },
+    {
+      id: 'D-205',
+      name: '마우스',
+      category: '전자제품',
+      location: 'D-1-3',
+      stockQuantity: 45,
+      minStockLevel: 20,
+      maxStockLevel: 80,
+      stockStatus: 'normal'
+    }
+  ]);
+  
+  // 필터 상태
+  const [filters, setFilters] = useState({
+    search: '',
+    category: '',
+    stockStatus: ''
+  });
+  
+  // 필터링된 상품 목록
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  
+  // 필터 변경 핸들러
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  // 필터 적용
+  const applyFilters = () => {
+    let filtered = [...products];
+    
+    // 검색어 필터
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(searchLower) || 
+        product.id.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // 카테고리 필터
+    if (filters.category) {
+      filtered = filtered.filter(product => product.category === filters.category);
+    }
+    
+    // 재고 상태 필터
+    if (filters.stockStatus) {
+      filtered = filtered.filter(product => product.stockStatus === filters.stockStatus);
+    }
+    
+    setFilteredProducts(filtered);
+  };
+  
+  // 필터 변경시 자동 적용
+  useEffect(() => {
+    applyFilters();
+  }, [filters]);
+  
+  // 상품 등록 후 상품 목록 업데이트
+  useEffect(() => {
+    // 실제로는 API를 통해 상품 목록을 가져오는 로직이 있어야 함
+    // 예제로 상품 목록을 초기화하는 코드만 추가
+    setFilteredProducts(products);
+  }, [products]);
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* 상단 네비게이션 바 */}
+      <nav className="bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between">
+            <div className="flex">
+              <div className="flex flex-shrink-0 items-center">
+                <span className="text-xl font-bold text-blue-600">물류 관리 시스템</span>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                >
+                  대시보드
+                </Link>
+                <Link
+                  href="/dashboard/products"
+                  className="inline-flex items-center border-b-2 border-blue-500 px-1 pt-1 text-sm font-medium text-gray-900"
+                >
+                  상품/재고
+                </Link>
+                <Link
+                  href="/dashboard/inventory"
+                  className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                >
+                  입출고 관리
+                </Link>
+                <Link
+                  href="/dashboard/reports"
+                  className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                >
+                  리포트
+                </Link>
+              </div>
+            </div>
+            <div className="hidden sm:ml-6 sm:flex sm:items-center">
+              <div className="relative ml-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-700">관리자님</span>
+                  <button
+                    type="button"
+                    className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* 메인 콘텐츠 */}
+      <div className="py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between">
+            <h1 className="text-2xl font-semibold text-gray-900">상품/재고 관리</h1>
+            <Link
+              href="/dashboard/products/register"
+              className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
+            >
+              + 상품 등록
+            </Link>
+          </div>
+        </div>
+        
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* 검색 및 필터 */}
+          <div className="mt-6 bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <label htmlFor="search" className="sr-only">검색</label>
+                <div className="relative rounded-md shadow-sm">
+                  <input
+                    type="text"
+                    name="search"
+                    id="search"
+                    value={filters.search}
+                    onChange={handleFilterChange}
+                    className="block w-full rounded-md border-0 py-2 pl-4 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                    placeholder="상품명, SKU 검색..."
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="sm:w-48">
+                <label htmlFor="category" className="sr-only">카테고리</label>
+                <select
+                  id="category"
+                  name="category"
+                  value={filters.category}
+                  onChange={handleFilterChange}
+                  className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                >
+                  <option value="">모든 카테고리</option>
+                  <option value="전자제품">전자제품</option>
+                  <option value="사무용품">사무용품</option>
+                  <option value="가구">가구</option>
+                  <option value="소모품">소모품</option>
+                  <option value="기타">기타</option>
+                </select>
+              </div>
+              <div className="sm:w-48">
+                <label htmlFor="stockStatus" className="sr-only">재고 상태</label>
+                <select
+                  id="stockStatus"
+                  name="stockStatus"
+                  value={filters.stockStatus}
+                  onChange={handleFilterChange}
+                  className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600"
+                >
+                  <option value="">모든 재고 상태</option>
+                  <option value="low">부족 재고</option>
+                  <option value="normal">정상 재고</option>
+                  <option value="excess">과잉 재고</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={applyFilters}
+                className="rounded-md bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-200"
+              >
+                필터 적용
+              </button>
+            </div>
+          </div>
+
+          {/* 상품 목록 */}
+          <div className="mt-6">
+            <div className="flex flex-col">
+              <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div className="overflow-hidden border-b border-gray-200 shadow sm:rounded-lg">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                            상품 정보
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                            카테고리
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                            위치
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                            재고 수량
+                          </th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                            상태
+                          </th>
+                          <th scope="col" className="relative px-6 py-3">
+                            <span className="sr-only">관리</span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {filteredProducts.map(product => (
+                          <tr key={product.id}>
+                            <td className="whitespace-nowrap px-6 py-4">
+                              <div className="flex items-center">
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">{product.id}</div>
+                                  <div className="text-sm text-gray-500">{product.name}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="whitespace-nowrap px-6 py-4">
+                              <div className="text-sm text-gray-900">{product.category}</div>
+                            </td>
+                            <td className="whitespace-nowrap px-6 py-4">
+                              <div className="text-sm text-gray-900">{product.location}</div>
+                            </td>
+                            <td className="whitespace-nowrap px-6 py-4">
+                              <div className="text-sm text-gray-900">{product.stockQuantity}</div>
+                              <div className="text-xs text-gray-500">
+                                최소: {product.minStockLevel} / 최대: {product.maxStockLevel}
+                              </div>
+                            </td>
+                            <td className="whitespace-nowrap px-6 py-4">
+                              <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                                product.stockStatus === 'low' 
+                                  ? 'bg-red-100 text-red-800' 
+                                  : product.stockStatus === 'excess' 
+                                    ? 'bg-yellow-100 text-yellow-800' 
+                                    : 'bg-green-100 text-green-800'
+                              }`}>
+                                {product.stockStatus === 'low' ? '부족' : product.stockStatus === 'excess' ? '과잉' : '정상'}
+                              </span>
+                            </td>
+                            <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                              <Link href={`/dashboard/products/edit/${product.id}`} className="text-blue-600 hover:text-blue-900 mr-4">
+                                수정
+                              </Link>
+                              <button
+                                onClick={() => {
+                                  if (confirm(`${product.name} 상품을 삭제하시겠습니까?`)) {
+                                    // 삭제 로직 추가 필요
+                                    alert('삭제 기능은 아직 구현되지 않았습니다.');
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                삭제
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredProducts.length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                              조회된 상품이 없습니다. 다른 필터 조건을 시도해보세요.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 페이지네이션 */}
+          <div className="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+            <div className="flex flex-1 justify-between sm:hidden">
+              <a
+                href="#"
+                className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                이전
+              </a>
+              <a
+                href="#"
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                다음
+              </a>
+            </div>
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-700">
+                  전체 <span className="font-medium">{products.length}</span> 개 항목 중{' '}
+                  <span className="font-medium">1</span> 에서{' '}
+                  <span className="font-medium">{Math.min(filteredProducts.length, 10)}</span> 까지 표시
+                </p>
+              </div>
+              <div>
+                <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                  <a
+                    href="#"
+                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  >
+                    <span className="sr-only">이전</span>
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                    </svg>
+                  </a>
+                  <a
+                    href="#"
+                    aria-current="page"
+                    className="relative z-10 inline-flex items-center bg-blue-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  >
+                    1
+                  </a>
+                  <a
+                    href="#"
+                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  >
+                    <span className="sr-only">다음</span>
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                    </svg>
+                  </a>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
