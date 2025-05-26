@@ -1,5 +1,5 @@
 <div align="center">
-<img src="/image.jpg" alt="image" width="800" height="800">
+<img src="/image.jpg" alt="image" width="800" height="600">
 </div>
 
 # 물류 관리 시스템 (Logistics Management System)
